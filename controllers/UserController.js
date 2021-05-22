@@ -3,6 +3,7 @@ class UserController {
         this.formEL = document.getElementById(formId)
         this.tableEl = document.getElementById(tableId)
         this.onSubmit()
+        this.loadImageUser()
     }
 
     onSubmit() {
@@ -12,7 +13,7 @@ class UserController {
             btn.disabled = true
             let values = this.getValues()
             if (!values) return false
-            this.getPhoto().then((content) => {
+            this.getPhoto(false).then((content) => {
                 values.photo = content
                 this.addLine(values)
                 this.formEL.reset()
@@ -28,6 +29,7 @@ class UserController {
             if (el) {
                 el.remove()
             }
+            document.querySelector('#imgFrmUser').style.display = 'none'
 
         });
 
@@ -35,8 +37,8 @@ class UserController {
 
     getPhoto() {
         return new Promise((resolve, reject) => {
-
             let fileReader = new FileReader();
+
             let elements = [...this.formEL.elements].filter(tr => {
                 if (tr.name === 'photo') {
                     return tr;
@@ -52,7 +54,8 @@ class UserController {
                 reject(e)
             }
 
-            file ? fileReader.readAsDataURL(file) : resolve('dist/img/boxed-bg.png')
+            file ? fileReader.readAsDataURL(file) : resolve('./dist/img/icon-default.png')
+
         })
 
     }
@@ -162,6 +165,21 @@ class UserController {
 
     }
 
+    loadImageUser() {
+        let inputFileEl = document.querySelector('#inputFileUser')
+        inputFileEl.addEventListener('blur', evt => {
+            evt.preventDefault()
+            this.getPhoto(false).then((srcPhoto) => {
+                let imgFrmUserEl = document.querySelector('#imgFrmUser')
+                imgFrmUserEl.setAttribute('src', `${srcPhoto}`)
+                imgFrmUserEl.style.display = ''
+
+            }, (e) => {
+                console.error(e)
+            })
+
+        })
+    }
 
     editeUser(tr, dataUser) {
         tr.style.display = 'none'
