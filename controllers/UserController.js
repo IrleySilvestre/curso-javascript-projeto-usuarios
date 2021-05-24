@@ -4,6 +4,8 @@ class UserController {
         this.tableEl = document.getElementById(tableId)
         this.onSubmit()
         this.loadImageUser()
+        this.listUsers()
+        this.updateCountUsers()
     }
 
     onSubmit() {
@@ -15,6 +17,7 @@ class UserController {
             if (!values) return false
             this.getPhoto(false).then((content) => {
                 values.photo = content
+                this.insertUser(values)
                 this.addLine(values)
                 this.formEL.reset()
                 this.removeValidation()
@@ -133,6 +136,14 @@ class UserController {
                     tr.querySelector(".btn-edit").addEventListener('click', e => {
                         this.editeUser(tr, dataUser)
                     })
+
+                    tr.querySelector(".btn-delete").addEventListener('click', e => {
+                        if(confirm('Confirma a remoção do registro?')){
+                            tr.remove()
+
+                            this.updateCountUsers()
+                        }
+                    })
                 }
 
 
@@ -150,13 +161,20 @@ class UserController {
                 <td >${dataUser.country}</td>
                 <td>
                   <button type="button" class="btn btn-primary btn-edit btn-xs btn-flat">Editar</button>
-                  <button type="button"  class="btn btn-danger btn-del btn-xs btn-flat">Excluir</button>
+                  <button type="button"  class="btn btn-danger btn-delete btn-del btn-xs btn-flat">Excluir</button>
                 </td>`
 
             document.querySelector('[data-title-form]').textContent = 'Novo Usuário'
 
             tr.querySelector(".btn-edit").addEventListener('click', e => {
                 this.editeUser(tr, dataUser)
+            })
+
+            tr.querySelector(".btn-delete").addEventListener('click', e => {
+                if(confirm('Confirma a remoção do registro?')){
+                    tr.remove()
+                    this.updateCountUsers()
+                }
             })
 
             this.tableEl.appendChild(tr)
@@ -179,6 +197,34 @@ class UserController {
             })
 
         })
+    }
+
+    getUserStorage(){
+        let users = []
+
+        if (localStorage.getItem('users')){
+            users = JSON.parse(localStorage.getItem('users'))
+        }
+        return users
+    }
+
+    listUsers(){
+        let users = this.getUserStorage()
+        users.forEach(dataUser=>{
+
+            let user = new User();
+            user.loadFromJSON(dataUser)
+
+            this.addLine(user)
+        })
+    }
+
+    insertUser(data){
+        let users = this.getUserStorage()
+
+        users.push(data)
+        // sessionStorage.setItem('users', JSON.stringify(users))
+        localStorage.setItem('users', JSON.stringify(users))
     }
 
     editeUser(tr, dataUser) {
